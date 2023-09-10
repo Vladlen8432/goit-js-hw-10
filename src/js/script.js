@@ -8,7 +8,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   const catName = document.querySelector('.cat-name');
   const catDescription = document.querySelector('.cat-description');
   const catTemperament = document.querySelector('.cat-temperament');
+  const catImage = document.querySelector('.cat-image');
   let selectedBreedId = null;
+
+  breedSelect.addEventListener('change', async () => {
+    selectedBreedId = breedSelect.value;
+
+    try {
+      loader.style.display = 'block';
+      error.style.display = 'none';
+      catInfo.style.display = 'none';
+
+      const catData = await fetchCatByBreed(selectedBreedId);
+      const [cat] = catData;
+
+      catName.textContent = cat.breeds[0].name;
+      catDescription.textContent = cat.breeds[0].description;
+      catTemperament.textContent = `Temperament: ${cat.breeds[0].temperament}`;
+      catImage.src = cat.url;
+
+      loader.style.display = 'none';
+      catInfo.style.display = 'block';
+    } catch (error) {
+      loader.style.display = 'none';
+      error.style.display = 'block';
+    }
+  });
 
   try {
     const breeds = await fetchBreeds();
@@ -21,33 +46,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       select: '.breed-select',
       placeholder: 'Select a breed',
       data: breedOptions,
-    });
-
-    breedSelect.addEventListener('change', async () => {
-      selectedBreedId = slim.selected();
-      if (selectedBreedId) {
-        loader.style.display = 'block';
-        error.style.display = 'none';
-        catInfo.style.display = 'none';
-
-        try {
-          const catData = await fetchCatByBreed(selectedBreedId);
-          const [cat] = catData;
-
-          catName.textContent = cat.breeds[0].name; // Змінено catName на name
-          catDescription.textContent = cat.breeds[0].description;
-          catTemperament.textContent = `Temperament: ${cat.breeds[0].temperament}`;
-          const catImage = document.querySelector('img');
-          catImage.src = cat.url;
-
-          loader.style.display = 'none';
-          catInfo.style.display = 'block';
-        } catch (error) {
-          console.error(error);
-          loader.style.display = 'none';
-          error.style.display = 'block';
-        }
-      }
     });
   } catch (error) {
     console.error(error);
